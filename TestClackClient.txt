@@ -1,0 +1,41 @@
+Testing the ClackClient Object with all 3 args given to the constructor and with a non-existent file being sent, an existent file, and then a message
+SENDFILE tst.txt
+Error: the file,tst.txt,cannot be found!
+SENDFILE test.txt
+File Description. 
+ Username: Username Type: 3 Date: Thu Sep 24 20:25:21 EDT 2020 Filename: test.txt File Contents: mmex
+This is a message!
+Message Description. 
+ Username: Username Type: 2 Date: Thu Sep 24 20:25:54 EDT 2020 Message: This is a message!
+DONE
+Message Description. 
+ Username: Username Type: 2 Date: Thu Sep 24 20:25:54 EDT 2020 Message: This is a message!
+
+Testing the ClackClient Object with the username and hostname given as args to the constructor and with a non-existent file being sent, an existent file, and then a message
+SENDFILE tst.txt
+Error: the file,tst.txt,cannot be found!
+ SENDFILE test.txt
+File Description. 
+ Username: UserName1 Type: 3 Date: Thu Sep 24 20:26:15 EDT 2020 Filename: test.txt File Contents: mmex
+This is a message!
+Message Description. 
+ Username: UserName1 Type: 2 Date: Thu Sep 24 20:26:21 EDT 2020 Message: This is a message!
+DONE
+Message Description. 
+ Username: UserName1 Type: 2 Date: Thu Sep 24 20:26:21 EDT 2020 Message: This is a message!
+
+Testing the ClackClient Object with the username given args to the constructor and with a non-existent file being sent, an existent file, and then a message
+SENDFILE tst.txt
+Error: the file,tst.txt,cannot be found!
+SENDFILE test.txt
+File Description. 
+ Username: UserName2 Type: 3 Date: Thu Sep 24 20:26:35 EDT 2020 Filename: test.txt File Contents: mmex
+This is a message!
+Message Description. 
+ Username: UserName2 Type: 2 Date: Thu Sep 24 20:26:43 EDT 2020 Message: This is a message!
+DONE
+Message Description. 
+ Username: UserName2 Type: 2 Date: Thu Sep 24 20:26:43 EDT 2020 Message: This is a message!
+
+
+Process finished with exit code 0

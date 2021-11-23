@@ -1,0 +1,662 @@
+Write-Up for Part 4
+
+We need two classes for threading in order to separate the functions of the server and the client, it increases
+encapsulation and makes sure that the information can be exchanged in an organized fashion. Also, if the client threads
+and the server threads are separate, it allows as many client threads as wanted with only one server thread.
+
+There should be a separate class to receive data from the server and print it. This allows easier implementation of a
+user interface as the user can deal with just their input rather than having to worry about also receiving the data
+from the server at the same time. The reason that the client only gets data from the user and sends it to the server is
+to compartmentalize the task in discrete chunks, and it is called a listener because it waits for an event to occur from
+the server and then proceeds to deal with the event in the appropriate manner.
+
+The reason you need a separate thread for each client is so that you can handle the unique information for each client separately,
+and it allows you to get each of those clients to talk to the server at the same time. The listener class
+'ClientSideServerListener' is different conceptually from the class 'ServerSideClientIO' because
+it does not have to deal with direct user input and interaction, whereas the latter deals with speaking to the server. The
+difference has to do with how 'ClientSideServerListener' is passively receiving information
+while 'ServerSideClientIO' is actively making change.
+
+The reason that the broadcast() and remove() methods are synchronized is so that the statements inside of the method
+are not wrongly interleaved together, when a few clients are using those methods at the same time.
+
+To implement the LISTUSERS command we first added a line of code in the readClientData method of ClackClient that sets the
+dataToSendToServer object equal to a new MessageClackData object that contains "LISTUSERS" as the message. This is then sent off to the
+server using the same code in ClackClient as before. Then in the ServerSideClientIO thread in the run method after the call to receiveData
+is made there is an if statement checking to see if the message of the dataToReceiveFromClient object is equal to the LISTUSERS command. If
+it is equal then it calls the broadcast method with a MessageClackData object thats message is a SENDUSERNAME command. In the ClackClients
+receiveData method if the dataToReceiveFromServer object has the command SENDUSERNAME then the ClackClient quickly sends back a
+MessageClackData object with its own username as the message, where it will then be handled like a normal message and be brocasted to all
+the clients connected to the server.
+
+Server and one client on Anthony and one client on Alif
+
+Client 1 Anthony:
+java main/ClackClient AJ@localhost
+This Class represents a client user.
+ Current User: AJ Host Name: localhost Port: 7000
+Write a line to send to the server:
+Hello
+Write a line to send to the server:
+Message Description.
+ Username: AJ Type: 2 Date: Fri Oct 23 11:19:34 EDT 2020 Message: Hello
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:19:30 EDT 2020 Message: Hello
+LISTUSERS
+Write a line to send to the server:
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:19:43 EDT 2020 Message: AJ
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:19:35 EDT 2020 Message: Alif
+DONE
+Disconnected From Server
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:19:35 EDT 2020 Message: Alif
+
+Client 1 Alif:
+C:\Users\Alif Jakir\Desktop\School Shit\CS242 Stuff\Programs\Clack\out\production\Backup Clack>java main/ClackClient Alif@128.153.219.217
+This Class represents a client user.
+ Current User: Alif Host Name: 128.153.219.217 Port: 7000
+Write a line to send to the server:
+Message Description.
+ Username: AJ Type: 2 Date: Fri Oct 23 11:19:34 EDT 2020 Message: Hello
+Hello
+Write a line to send to the server:
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:19:30 EDT 2020 Message: Hello
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:19:43 EDT 2020 Message: AJ
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:19:35 EDT 2020 Message: Alif
+DONE
+Disconnected From Server
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:19:35 EDT 2020 Message: Alif
+
+Server 1 Anthony:
+This Class represents the server
+ Port:7000
+A Client has Connected
+A Client has Connected
+Message Description.
+ Username: AJ Type: 2 Date: Fri Oct 23 11:19:34 EDT 2020 Message: Hello
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:19:30 EDT 2020 Message: Hello
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:19:43 EDT 2020 Message: AJ
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:19:35 EDT 2020 Message: Alif
+Client Disconnected
+Client Disconnected
+
+
+ClackServer and one client on Alif and one client on Anthony
+
+Client 2 Anthony:
+This Class represents the server
+ Port:7000
+A Client has Connected
+A Client has Connected
+A Client has Connected
+A Client has Connected
+A Client has Connected
+A Client has Connected
+A Client has Connected
+A Client has Connected
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:28 EDT 2020 Message: PERSON1
+Message Description.
+ Username: AJ Type: 2 Date: Fri Oct 23 11:33:38 EDT 2020 Message: Hello
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:35 EDT 2020 Message: PERSON@
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:44 EDT 2020 Message: PERSON3
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:49 EDT 2020 Message: PERSON4
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:54 EDT 2020 Message: PERSON5
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Client Disconnected
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Client Disconnected
+Client Disconnected
+Client Disconnected
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:22 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+Client Disconnected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+
+java main/ClackClient AJ@128.153.221.223
+This Class represents a client user.
+ Current User: AJ Host Name: 128.153.221.223 Port: 7000
+Write a line to send to the server:
+Hello
+Write a line to send to the server:
+Message Description.
+ Username: AJ Type: 2 Date: Fri Oct 23 11:24:21 EDT 2020 Message: Hello
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:24:37 EDT 2020 Message: Hello
+USERMessage Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:24:42 EDT 2020 Message: Alif
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:24:50 EDT 2020 Message: AJ
+ DONE
+Disconnected From Server
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:24:50 EDT 2020 Message: AJ
+
+Client 2 Alif:
+This Class represents a client user.
+ Current User: Alif Host Name: localhost Port: 7000
+Write a line to send to the server:
+Hello
+Write a line to send to the server:
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:24:37 EDT 2020 Message: Hello
+LISTUSERS
+Write a line to send to the server:
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:24:42 EDT 2020 Message: Alif
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:24:50 EDT 2020 Message: AJ
+DONE
+Disconnected From Server
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:24:50 EDT 2020 Message: AJ
+
+Server 2 Alif:
+java main/ClackServer
+This Class represents the server
+ Port:7000
+A Client has Connected
+Message Description.
+ Username: AJ Type: 2 Date: Fri Oct 23 11:24:21 EDT 2020 Message: Hello
+A Client has Connected
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:24:37 EDT 2020 Message: Hello
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:24:42 EDT 2020 Message: Alif
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:24:50 EDT 2020 Message: AJ
+Client Disconnected
+Client Disconnected
+
+Server and 3 Client on Anthony and 5 client on Alif
+
+Server 3 Anthony:
+
+Client #1 Anthony:
+This Class represents a client user.
+ Current User: AJ Host Name: localhost Port: 7000
+Write a line to send to the server:
+HelMessage Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:28 EDT 2020 Message: PERSON1
+lo
+Write a line to send to the server:
+Message Description.
+ Username: AJ Type: 2 Date: Fri Oct 23 11:33:38 EDT 2020 Message: Hello
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:35 EDT 2020 Message: PERSON@
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:44 EDT 2020 Message: PERSON3
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:49 EDT 2020 Message: PERSON4
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:54 EDT 2020 Message: PERSON5
+LISTUSERS
+Write a line to send to the server:
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+DONE
+Disconnected From Server
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+
+Client #2 Anthony:
+This Class represents a client user.
+ Current User: AJ3 Host Name: localhost Port: 7000
+Write a line to send to the server:
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:28 EDT 2020 Message: PERSON1
+Message Description.
+ Username: AJ Type: 2 Date: Fri Oct 23 11:33:38 EDT 2020 Message: Hello
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:35 EDT 2020 Message: PERSON@
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:44 EDT 2020 Message: PERSON3
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:49 EDT 2020 Message: PERSON4
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:54 EDT 2020 Message: PERSON5
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+LISTUSERS
+Write a line to send to the server:
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+DONE
+Disconnected From Server
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+
+Client #3 Anthony:
+This Class represents a client user.
+ Current User: AJ2 Host Name: localhost Port: 7000
+Write a line to send to the server:
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:28 EDT 2020 Message: PERSON1
+Message Description.
+ Username: AJ Type: 2 Date: Fri Oct 23 11:33:38 EDT 2020 Message: Hello
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:35 EDT 2020 Message: PERSON@
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:44 EDT 2020 Message: PERSON3
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:49 EDT 2020 Message: PERSON4
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:54 EDT 2020 Message: PERSON5
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+LISTUSERS
+Write a line to send to the server:
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:22 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+DONE
+Disconnected From Server
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+
+Client #1 Alif:
+This Class represents a client user.
+ Current User: Alif Host Name: 128.153.219.217 Port: 7000
+Write a line to send to the server:
+PERSON1
+Write a line to send to the server:
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:28 EDT 2020 Message: PERSON1
+Message Description.
+ Username: AJ Type: 2 Date: Fri Oct 23 11:33:38 EDT 2020 Message: Hello
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:35 EDT 2020 Message: PERSON@
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:44 EDT 2020 Message: PERSON3
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:49 EDT 2020 Message: PERSON4
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:54 EDT 2020 Message: PERSON5
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:22 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+DONE
+Disconnected From Server
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+
+Client #2 Alif:
+This Class represents a client user.
+ Current User: Alif Host Name: 128.153.219.217 Port: 7000
+Write a line to send to the server:
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:28 EDT 2020 Message: PERSON1
+Message Description.
+ Username: AJ Type: 2 Date: Fri Oct 23 11:33:38 EDT 2020 Message: Hello
+PERSON@
+Write a line to send to the server:
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:35 EDT 2020 Message: PERSON@
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:44 EDT 2020 Message: PERSON3
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:49 EDT 2020 Message: PERSON4
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:54 EDT 2020 Message: PERSON5
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:22 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+DONE
+Disconnected From Server
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+
+Client #3 Alif:
+This Class represents a client user.
+ Current User: Alif Host Name: 128.153.219.217 Port: 7000
+Write a line to send to the server:
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:28 EDT 2020 Message: PERSON1
+Message Description.
+ Username: AJ Type: 2 Date: Fri Oct 23 11:33:38 EDT 2020 Message: Hello
+PERSON@
+Write a line to send to the server:
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:35 EDT 2020 Message: PERSON@
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:44 EDT 2020 Message: PERSON3
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:49 EDT 2020 Message: PERSON4
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:54 EDT 2020 Message: PERSON5
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:22 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+DONE
+Disconnected From Server
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: Alif
+
+Client #4 Alif:
+Write a line to send to the server:
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:28 EDT 2020 Message: PERSON1
+Message Description.
+ Username: AJ Type: 2 Date: Fri Oct 23 11:33:38 EDT 2020 Message: Hello
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:35 EDT 2020 Message: PERSON@
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:44 EDT 2020 Message: PERSON3
+PERSON4
+Write a line to send to the server:
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:49 EDT 2020 Message: PERSON4
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:54 EDT 2020 Message: PERSON5
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+DONE
+Disconnected From Server
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+
+Client #5 Alif:
+Write a line to send to the server:
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:28 EDT 2020 Message: PERSON1
+Message Description.
+ Username: AJ Type: 2 Date: Fri Oct 23 11:33:38 EDT 2020 Message: Hello
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:35 EDT 2020 Message: PERSON@
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:44 EDT 2020 Message: PERSON3
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:49 EDT 2020 Message: PERSON4
+PERSON5
+Write a line to send to the server:
+Message Description.
+ Username: Alif Type: 2 Date: Fri Oct 23 11:33:54 EDT 2020 Message: PERSON5
+Message Description.
+ Username: AJ Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:08 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:01 EDT 2020 Message: Alif
+Message Description.
+ Username: AJ3 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ3
+Message Description.
+ Username: AJ2 Type: 0 Date: Fri Oct 23 11:34:14 EDT 2020 Message: AJ2
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif
+DONE
+Disconnected From Server
+Message Description.
+ Username: Alif Type: 0 Date: Fri Oct 23 11:34:06 EDT 2020 Message: Alif

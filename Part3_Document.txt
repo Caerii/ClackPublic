@@ -1,0 +1,13 @@
+This Class represents a client user.
+ Current User: Anthony Host Name: 128.153.221.223 Port: 7000
+Write a line to send to the server:
+Hello
+Message Description.
+ Username: Anthony Type: 2 Date: Thu Oct 08 20:44:23 EDT 2020 Message: Hello
+Write a line to send to the server:
+This is a test!
+Message Description.
+ Username: Anthony Type: 2 Date: Thu Oct 08 20:44:27 EDT 2020 Message: This is a test!
+Write a line to send to the server:
+DONE
+Disconnected From Server
