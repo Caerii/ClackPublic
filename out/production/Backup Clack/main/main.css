@@ -1,0 +1,60 @@
+.graytheme {
+	-fx-background-color: #333333; /* used for BorderPane */
+	-fx-background-radius: 5; /* used for BorderPane */
+	-fx-padding: 10 10 10 20; /* used for BorderPane */
+	-fx-alignment: center; /* used for BorderPane and HBox */
+	-fx-hgap: 10.0; /* used for BorderPane */
+	-fx-spacing: 10.0; /* used for HBox */
+}
+
+.buttontheme {
+	-fx-background-color: #FF00FF;
+	-fx-font-family: "Comic Sans MS";
+	-fx-text-fill: #222222;
+}
+
+.ipad-dark-grey {
+    -fx-background-color: #B5BAB7;
+    -fx-background-insets: 0,1,4,5,6;
+    -fx-background-radius: 9,8,5,4,3;
+    -fx-padding: 15 30 15 30;
+    -fx-font-family: "Comic Sans MS";
+    -fx-font-size: 18px;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow( three-pass-box , rgba(255,255,255,0.2) , 1, 0.0 , 0 , 1);
+}
+.ipad-darker-grey {
+    -fx-background-color: #3F4350;
+    -fx-background-insets: 0,1,4,5,6;
+    -fx-background-radius: 9,8,5,4,3;
+    -fx-padding: 15 30 15 30;
+    -fx-font-family: "Comic Sans MS";
+    -fx-font-size: 18px;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow( three-pass-box , rgba(255,255,255,0.2) , 1, 0.0 , 0 , 1);
+}
+.ipad-dark-grey Text {
+    -fx-effect: dropshadow( one-pass-box , black , 0, 0.0 , 0 , -1 );
+}
+
+.ipad {
+    -fx-background-color: #B5BAB7;
+    -fx-background-insets: 0,1,4,5,6;
+    -fx-background-radius: 9,8,5,4,3;
+    /*-fx-padding: 15 30 15 30;*/
+    -fx-font-family: "Comic Sans MS";
+    -fx-font-size: 15px;
+    -fx-text-fill: black;
+    -fx-effect: dropshadow( three-pass-box , rgba(255,255,255,0.2) , 1, 0.0 , 0 , 1);
+}
+
+.ipad-darker{
+    -fx-background-color: #3F4350;
+    -fx-background-insets: 0,1,4,5,6;
+    -fx-background-radius: 9,8,5,4,3;
+    -fx-padding: 15 5 15 10;
+    -fx-font-family: "Comic Sans MS";
+    -fx-font-size: 18px;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow( three-pass-box , rgba(255,255,255,0.2) , 1, 0.0 , 0 , 1);
+}
